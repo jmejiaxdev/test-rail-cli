@@ -19,7 +19,7 @@ const updateTestCases = async (fileContent: string, testCases: TestCase[]): Prom
   // Even if you're using await inside the loop, the prototype itself doesn't pause. This means the
   // loop finishes iterating and executes before any of the await calls within the loop have resolved.
   for (const testCase of testCases) {
-    console.log("Updating test case", testCase);
+    console.log("Updating test case:", testCase);
 
     try {
       const gherkinTitle = isOpenAIEnabled ? await transformToGherkin(testCase.title) : testCase.title;
@@ -28,7 +28,7 @@ const updateTestCases = async (fileContent: string, testCases: TestCase[]): Prom
         return;
       }
 
-      const testRailsCase = await upsertTestCase(gherkinTitle, testCase.id);
+      const testRailsCase = await upsertTestCase(testCase.id, gherkinTitle);
       if (!testRailsCase || !testRailsCase?.id) {
         console.warn("Unable to upsert TestRails case", testCase.title);
         return;
@@ -51,7 +51,7 @@ const updateTestFiles = async () => {
   // Even if you're using await inside the loop, the prototype itself doesn't pause. This means the
   // loop finishes iterating and executes before any of the await calls within the loop have resolved.
   for (const filePath of filesPaths) {
-    console.log("Updating test file", filePath);
+    console.log("Updating test file:", filePath);
 
     try {
       let fileContent = fs.readFileSync(filePath, "utf8");
@@ -68,8 +68,6 @@ const updateTestFiles = async () => {
         return;
       }
 
-      console.log("filePath", filePath);
-      console.log("updatedTestContent", updatedTestCases);
       fs.writeFileSync(filePath, updatedTestCases, "utf8");
     } catch (error) {
       logError("Updating test file error", error);
