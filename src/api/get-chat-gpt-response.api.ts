@@ -1,4 +1,4 @@
-import openaiClient from "../clients/chat-gpt.client";
+import openaiClient from "../clients/open-ai.client";
 
 export default async function getChatGPTResponse(prompt: string): Promise<string | null> {
   const response = await openaiClient.chat.completions.create({
