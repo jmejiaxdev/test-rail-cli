@@ -1,5 +1,4 @@
-describe("Test", () => {
-  // TODO: Add tests
+describe("Tests", () => {
   it("it 1", () => {
     expect(1).toBe(1);
   });
@@ -8,7 +7,7 @@ describe("Test", () => {
     expect(1).toBe(1);
   });
 
-  it("34567890: it 3", () => {
+  it("16400584: it 3", () => {
     expect(1).toBe(1);
   });
 
