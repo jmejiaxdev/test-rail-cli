@@ -10,6 +10,14 @@
     "strict": true /* Enable all strict type-checking options. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*", "example-2.test.ts"], // Files to include
+  "include": [
+    "src/**/*",
+    "example-2.test.ts",
+    "tests/open-ai.test.ts",
+    "tests/test-rail.test.ts",
+    "tests/add-test-rail-case.test.ts",
+    "tests/get-chat-gpt-response.test.ts",
+    "tests/get-test-rail-case.test.ts"
+  ], // Files to include
   "exclude": ["dist"]
 }

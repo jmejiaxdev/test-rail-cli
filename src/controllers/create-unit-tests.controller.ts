@@ -1,84 +1,93 @@
-import * as fs from "fs";
-import * as path from "path";
-import getFiles from "../utils/get-files.util";
-import logError from "../utils/log-error.util";
-import getUnitTestsFromChatGPT from "../utils/get-unit-test-from-chat-gpt.util";
-import extractTestCases from "../utils/extract-test-cases.util";
-import addTestRailCase from "../api/add-test-rail-case.api";
-import { TestCase } from "../definitions/test-case.definition";
-import toTestCase from "../utils/to-test-case.util";
+import fs from "fs";
+import path from "path";
+import { TestCase } from "../definitions/test-rails.definitions";
+import { rl } from "../definitions/read-line.definitions";
+import testCaseService from "../services/test-case.services";
+import consoleUtils from "../utils/console.utils";
+import fileUtils from "../utils/file.utils";
+import { config } from "../definitions/config.definitions";
 
-const dirPath = process.env.DIR_PATH || "";
+const readTestCase = async (): Promise<TestCase> => {
+  const configTestCase = config.testRails.testCase;
+  const testCase: TestCase = { ...configTestCase };
 
-const addUnitTestsToTestRails = async (filePath: string): Promise<string | undefined> => {
-  const fileContent = fs.readFileSync(filePath, "utf8");
+  testCase.section_id =
+    (await consoleUtils.askQuestion(`Enter TestRail test case Section (default: ${configTestCase.section_id}): `)) ||
+    configTestCase.section_id;
 
-  const testCases = extractTestCases(fileContent);
-  if (!testCases.length) {
-    console.warn("No test cases found", filePath);
-    return;
-  }
+  testCase.template =
+    parseInt(
+      await consoleUtils.askQuestion(`Enter TestRail test case Template (default: ${configTestCase.template}): `)
+    ) || configTestCase.template;
 
-  let updatedContent;
+  testCase.type_id =
+    parseInt(await consoleUtils.askQuestion(`Enter TestRail test case Type (default: ${configTestCase.type_id}): `)) ||
+    configTestCase.type_id;
 
-  for (const testCase of testCases) {
-    console.log("Updating test case:", testCase);
+  testCase.priority_id =
+    parseInt(
+      await consoleUtils.askQuestion(`Enter TestRail test case Priority (default: ${configTestCase.priority_id}): `)
+    ) || configTestCase.priority_id;
 
-    if (testCase?.id) {
-      console.log("Test already exists in TestRails", testCase);
-      return;
-    }
+  testCase.refs =
+    (await consoleUtils.askQuestion(`Enter TestRail test case References (default: ${configTestCase.refs}): `)) ||
+    configTestCase.refs;
 
-    try {
-      const testRailCase = await addTestRailCase(testCase.title);
-      if (!testRailCase) {
-        console.log("Unable to create test rails case:", testCase);
-        break;
-      }
+  testCase.custom_manual_vs_automated =
+    parseInt(
+      await consoleUtils.askQuestion(`Manual vs Automated (default: ${configTestCase.custom_manual_vs_automated}): `)
+    ) || configTestCase.custom_manual_vs_automated;
 
-      updatedContent = toTestCase(fileContent, testRailCase.data as TestCase, testCase.title || "");
-    } catch (error: any) {
-      logError("Updating test case error", error);
-    }
-  }
+  testCase.custom_automation_tool_type =
+    parseInt(
+      await consoleUtils.askQuestion(`Automation Tool Type (default: ${configTestCase.custom_automation_tool_type}): `)
+    ) || configTestCase.custom_automation_tool_type;
 
-  return updatedContent;
+  testCase.custom_test_level =
+    parseInt(await consoleUtils.askQuestion(`Test Level (default: ${configTestCase.custom_test_level}): `)) ||
+    configTestCase.custom_test_level;
+
+  return testCase;
 };
 
-export default async function createUnitTests() {
-  if (!dirPath) {
-    console.error("Directory path is not defined");
-    return;
+const readUnitTestFilePath = async (filePath: string): Promise<string> => {
+  const unitTestsFilePath = await consoleUtils.askQuestion("Enter the unit tests file path (leave blank to create): ");
+
+  if (!unitTestsFilePath) {
+    return fileUtils.createUnitTestsFile(filePath, config.testExtension);
   }
 
-  const files = getFiles(dirPath);
+  const isTestFileInvalid =
+    !fs.existsSync(unitTestsFilePath) || path.extname(unitTestsFilePath) !== config.testExtension;
 
-  for (const file of files) {
-    console.log("Creating unit test:", file);
+  if (isTestFileInvalid) {
+    throw new Error(`Invalid unit test file path or extension "${unitTestsFilePath}"`);
+  }
 
-    try {
-      let fileContent = fs.readFileSync(file.path, "utf8");
+  return unitTestsFilePath;
+};
 
-      const unitTests = await getUnitTestsFromChatGPT(fileContent);
-      if (!unitTests) {
-        console.warn("Unable to fetch unit test from ChatGPT:", fileContent);
-        break;
-      }
+const readFilePath = async (): Promise<string> => {
+  const filePath = await consoleUtils.askQuestion("Enter the file path: ");
 
-      const testFileName = file.name.replace(/\.ts(x)?$/, ".test.ts");
-      const testFilePath = path.join(path.dirname(file.path), testFileName);
+  if (!fs.existsSync(filePath)) throw new Error(`"${filePath}" is not a valid file path`);
 
-      const testRailsUnitTests = await addUnitTestsToTestRails(testFilePath);
-      if (!testRailsUnitTests) {
-        console.warn("Unable to add unit test to Test Rails:", testFilePath);
-        break;
-      }
+  return filePath;
+};
 
-      // FIXME if file already exist, add new content.
-      fs.writeFileSync(testFilePath, testRailsUnitTests);
-      console.log("Unit test created:", testFilePath, testFileName);
-    } catch (error) {
-      logError("Creating unit test error", error);
-    }
+export default async function createUnitTests(): Promise<void> {
+  try {
+    console.log("TEST 1");
+    const filePath = await readFilePath();
+    console.log("TEST 2");
+    const unitTestsFilePath = await readUnitTestFilePath(filePath);
+    console.log("TEST 3");
+    const testCase = await readTestCase();
+
+    await testCaseService.createTestCases(unitTestsFilePath, testCase);
+  } catch (err) {
+    console.error("Error:", err);
+  } finally {
+    rl.close();
   }
 }

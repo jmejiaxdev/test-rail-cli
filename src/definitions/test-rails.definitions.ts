@@ -1,3 +1,8 @@
+export interface Suite {
+  id: number;
+  name: string;
+}
+
 export enum Template {
   TestCase = 1,
 }
@@ -43,3 +48,5 @@ export interface TestCase {
   custom_automation_tool_type?: AutomationToolType;
   custom_test_level?: TestLevel;
 }
+
+export type TestDescription = Pick<TestCase, "id" | "title">;

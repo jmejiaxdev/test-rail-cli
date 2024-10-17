@@ -52,7 +52,7 @@
    TESTRAIL_SUITE_ID=your_suite_id
    TESTRAIL_SECTION_ID=your_section_id
 
-   OPENAI_API_KEY=your_openai_api_key
+   OPEN_AI_API_KEY=your_openai_api_key
    ```
 
 ## Usage
@@ -133,7 +133,7 @@ processTest("should get all flags", "./testFile.test.ts");
 - **TESTRAIL_SUITE_ID**: The ID of the suite where test cases should be added.
 - **TESTRAIL_SECTION_ID**: The section ID where test cases are organized.
 
-- **OPENAI_API_KEY**: Your OpenAI API key to access the GPT model.
+- **OPEN_AI_API_KEY**: Your OpenAI API key to access the GPT model.
 
 ### Scripts
 
