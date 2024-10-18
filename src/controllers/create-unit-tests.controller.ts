@@ -134,5 +134,3 @@ export default async function createUnitTests(): Promise<void> {
     rl.close();
   }
 }
-
-//"run:create": "npx tsx src/controllers/create-unit-tests.controller.ts",
