@@ -1,12 +1,12 @@
 {
   "name": "test-sync-ai",
   "version": "1.0.0",
-  "description": "Integrating test descriptions with TestRail and automating Gherkin conversion",
+  "description": "Integrating test descriptions with TestRails and automating Gherkin conversion",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "local": "npx tsx src/index.ts",
+    "start": "npx tsx src/index.ts",
     "test": "test",
     "test:watch": "jest --watch"
   },
@@ -20,6 +20,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^29.5.13",
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "jest-watch-typeahead": "^2.2.2",
     "ts-jest": "^29.2.5",

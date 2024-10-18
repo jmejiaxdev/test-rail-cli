@@ -1,66 +1,82 @@
 import fs from "fs";
 import openAIAPI from "../api/open-ai.api";
 import testRailsAPI from "../api/test-rails.api";
-import { TestCase } from "../definitions/test-rails.definitions";
-import { ANSIColor } from "../definitions/color.definitions";
+import { Description, TestCase } from "../definitions/test-case.definitions";
 import consoleUtils from "../utils/console.utils";
 
-const createTestCases = async (filePath: string, testCase: TestCase): Promise<void> => {
-  let unchangedCount = 0,
-    createdCount = 0,
-    deletedCount = 0;
+const addUnitTests = async (descriptions: Description[], options: TestCase): Promise<TestCase[]> => {
+  return await Promise.all(
+    descriptions.map(async (description) => await testRailsAPI.addTestCase({ ...options, title: description.title }))
+  );
+};
 
-  let testRailsTestCases = await testRailsAPI.getTestCases();
+const createUnitTests = async (codeFilePath: string, unitTestsFilePath: string): Promise<string | null> => {
+  const code = fs.readFileSync(codeFilePath, "utf8");
+  const unitTests = fs.readFileSync(unitTestsFilePath, "utf8");
 
-  let match: RegExpExecArray | null;
-  const regex = /test\(["'`](\d{6,8})?:?\s*([^\n"']+)["'`]\s*,/g;
-  const fileContent = fs.readFileSync(filePath, "utf8");
+  return await openAIAPI.getChatGPTResponse(
+    `Given the following code: 
+    ${code}
 
-  while ((match = regex.exec(fileContent)) !== null) {
-    const testDescription = { id: match[1], title: match[2].trim() };
+    And the following unit tests: ${unitTests}
 
-    if (testRailsTestCases.some((tc) => tc.id === testDescription.id)) {
-      testRailsTestCases = testRailsTestCases.filter((tc) => tc.id !== testDescription.id);
-      consoleUtils.logTestCaseStatus("unchanged", testDescription.id, testDescription.title);
-      unchangedCount++;
-      continue;
-    }
+    Generate missing unit tests in Jest, using Gherkin-style descriptions in the format "Given-When-Then". 
+    Provide the code only, without any additional descriptions or text.`
+  );
+};
 
-    try {
-      testDescription.title =
-        (await openAIAPI.getChatGPTResponse(
-          `Convert the following test title to Gherkin format: "${testDescription.title}"`
-        )) || testDescription.title;
+const extractUnitTestsDescriptions = (unitTests: string): Description[] => {
+  // Regular expression to match test descriptions with an optional id at the start
+  const testDescriptionRegex = /test\(['"`](\d+)?\s*:?\s*(.*)['"`],/g;
 
-      const newTestCase = await testRailsAPI.createTestCase({ ...testCase, ...testDescription });
-      fileContent.concat(`\n${newTestCase}\n`);
+  const testDescriptions: Description[] = [];
+  let match;
 
-      consoleUtils.logTestCaseStatus("created", testDescription.id, testDescription.title);
-      createdCount++;
-    } catch (error) {
-      console.error("Error creating test case:", error);
-    }
+  while ((match = testDescriptionRegex.exec(unitTests)) !== null) {
+    const id = match[1] || null;
+    const title = match[2].trim();
+    testDescriptions.push({ id, title });
   }
 
-  fs.writeFileSync(filePath, fileContent, "utf8");
+  return testDescriptions;
+};
 
-  if (testRailsTestCases.length > 0) {
-    const confirm = await consoleUtils.confirmTestCasesDeletion(testRailsTestCases, filePath);
+// rename function
+const deleteTestCases = async (sectionId: string): Promise<TestCase[]> => {
+  const testRailsTestCases = await testRailsAPI.getTestCases(sectionId);
+  const testRailsTestCasesCount = testRailsTestCases.length;
 
-    if (confirm === "delete") {
-      testRailsTestCases.forEach((tc) => testRailsAPI.deleteTestCase(tc.id));
-      console.log(`${testRailsTestCases.length} test cases marked as deleted.`);
-      deletedCount += testRailsTestCases.length;
-    }
+  if (!testRailsTestCasesCount) return testRailsTestCases;
+
+  // Soft delete test cases
+  await Promise.all(
+    testRailsTestCases.map(async (testCase) => {
+      await testRailsAPI.updateTestCase(testCase.id, { custom_status_id: 6 });
+      consoleUtils.logTestCaseStatus("markAsDeleted", testCase.id, testCase.title);
+    })
+  );
+
+  const confirm = await consoleUtils.getInput(
+    `${testRailsTestCasesCount} test cases were marked as deleted in TestRails. If you are certain they don't belong to another file and wish to delete them in TestRails, type "delete" to confirm:\n`
+  );
+
+  if (confirm === "delete") {
+    await Promise.all(
+      testRailsTestCases.map(async (testCase) => {
+        await testRailsAPI.deleteTestCase(testCase.id);
+        consoleUtils.logTestCaseStatus("deleted", testCase.id, testCase.title);
+      })
+    );
   }
 
-  console.log(ANSIColor.Green, `- ${createdCount} test cases created.`);
-  console.log(ANSIColor.Yellow, `- ${unchangedCount} test cases unchanged.`);
-  console.log(ANSIColor.Red, `- ${deletedCount} test cases deleted.`);
+  return testRailsTestCases;
 };
 
 const testCaseService = {
-  createTestCases,
+  addUnitTests,
+  createUnitTests,
+  deleteTestCases,
+  extractUnitTestsDescriptions,
 };
 
 export default testCaseService;

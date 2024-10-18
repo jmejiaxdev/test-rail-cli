@@ -1,12 +1,12 @@
 # TestSyncAI
 
-**TestSyncAI** is a powerful tool that automates the process of converting test descriptions into Gherkin language, syncing test cases with TestRail, and updating Jest test descriptions with TestRail IDs. By integrating with OpenAI's ChatGPT and TestRail APIs, TestSyncAI ensures that your testing workflow is efficient and seamless.
+**TestSyncAI** is a powerful tool that automates the process of converting test descriptions into Gherkin language, syncing test cases with TestRails, and updating Jest test descriptions with TestRails IDs. By integrating with OpenAI's ChatGPT and TestRails APIs, TestSyncAI ensures that your testing workflow is efficient and seamless.
 
 ## Features
 
 - **Gherkin Conversion**: Automatically convert test descriptions into Gherkin language using OpenAI's ChatGPT API.
-- **TestRail Integration**: Create or update test cases in TestRail based on Jest test descriptions.
-- **Test Case Syncing**: Append TestRail test case IDs to Jest test descriptions for easy tracking.
+- **TestRails Integration**: Create or update test cases in TestRails based on Jest test descriptions.
+- **Test Case Syncing**: Append TestRails test case IDs to Jest test descriptions for easy tracking.
 - **Automation**: Simplify test management by automating routine tasks like syncing and updating test cases.
 
 ## Table of Contents
@@ -14,7 +14,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
   - [Convert to Gherkin](#convert-to-gherkin)
-  - [Sync with TestRail](#sync-with-testrail)
+  - [Sync with TestRails](#sync-with-testrail)
   - [Update Jest Test Descriptions](#update-jest-test-descriptions)
 - [Configuration](#configuration)
 - [License](#license)
@@ -24,7 +24,7 @@
 ### Prerequisites
 
 - Node.js v14 or higher
-- TestRail API access
+- TestRails API access
 - OpenAI API access
 
 ### Steps
@@ -42,7 +42,7 @@
    npm install
    ```
 
-3. Set up environment variables for TestRail and OpenAI API keys. Create a `.env` file in the root directory with the following:
+3. Set up environment variables for TestRails and OpenAI API keys. Create a `.env` file in the root directory with the following:
 
    ```bash
    TESTRAIL_API_URL=https://yourcompany.testrail.io/index.php?/api/v2/
@@ -71,23 +71,23 @@ convertToGherkin("should get all flags")
   .catch(console.error);
 ```
 
-### Sync with TestRail
+### Sync with TestRails
 
-To sync test descriptions with TestRail (create or update a test case), use the `getOrCreateTestRailId` function:
+To sync test descriptions with TestRails (create or update a test case), use the `getOrCreateTestRailId` function:
 
 ```javascript
 const { getOrCreateTestRailId } = require("./src/testrail");
 
 getOrCreateTestRailId("should get all flags")
   .then((testId) => {
-    console.log(`TestRail ID: ${testId}`);
+    console.log(`TestRails ID: ${testId}`);
   })
   .catch(console.error);
 ```
 
 ### Update Jest Test Descriptions
 
-To update Jest test descriptions with the TestRail ID, use the `addTestRailIdToTestDescription` function:
+To update Jest test descriptions with the TestRails ID, use the `addTestRailIdToTestDescription` function:
 
 ```javascript
 const { addTestRailIdToTestDescription } = require("./src/updater");
@@ -110,10 +110,10 @@ async function processTest(testDescription, filePath) {
     console.log(`Gherkin for "${testDescription}":\n${gherkin}`);
 
     const testId = await getOrCreateTestRailId(testDescription);
-    console.log(`TestRail ID for "${testDescription}": ${testId}`);
+    console.log(`TestRails ID for "${testDescription}": ${testId}`);
 
     addTestRailIdToTestDescription(filePath, testDescription, testId);
-    console.log(`Updated test description with TestRail ID in ${filePath}`);
+    console.log(`Updated test description with TestRails ID in ${filePath}`);
   } catch (error) {
     console.error("Error processing test:", error);
   }
@@ -126,10 +126,10 @@ processTest("should get all flags", "./testFile.test.ts");
 
 ### Environment Variables
 
-- **TESTRAIL_API_URL**: The base URL for your TestRail API.
-- **TESTRAIL_USERNAME**: Your TestRail account username.
-- **TESTRAIL_API_KEY**: The API key for TestRail authentication.
-- **TESTRAIL_PROJECT_ID**: The ID of your TestRail project.
+- **TESTRAIL_API_URL**: The base URL for your TestRails API.
+- **TESTRAIL_USERNAME**: Your TestRails account username.
+- **TESTRAIL_API_KEY**: The API key for TestRails authentication.
+- **TESTRAIL_PROJECT_ID**: The ID of your TestRails project.
 - **TESTRAIL_SUITE_ID**: The ID of the suite where test cases should be added.
 - **TESTRAIL_SECTION_ID**: The section ID where test cases are organized.
 
@@ -140,8 +140,8 @@ processTest("should get all flags", "./testFile.test.ts");
 The project includes three main scripts:
 
 - **converters.js**: Contains the function to convert test descriptions to Gherkin format using OpenAI.
-- **testrail.js**: Handles the interaction with TestRail API (create/update tests).
-- **updater.js**: Modifies Jest test descriptions to include TestRail IDs.
+- **testrail.js**: Handles the interaction with TestRails API (create/update tests).
+- **updater.js**: Modifies Jest test descriptions to include TestRails IDs.
 
 ## License
 

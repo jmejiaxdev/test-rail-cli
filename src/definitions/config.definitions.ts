@@ -7,7 +7,7 @@ import {
   TestLevel,
   Type,
   TypeAutomation,
-} from "./test-rails.definitions";
+} from "./test-case.definitions";
 
 interface TestRailsConfig {
   baseURL: string;
@@ -37,6 +37,7 @@ export const config: TestSyncAIConfig = {
   testExtension: process.env.TEST_EXTENSION || ".test",
   testRails: {
     baseURL: process.env.TEST_RAILS_BASE_URL || "",
+    username: process.env.TEST_RAILS_USERNAME || "",
     password: process.env.TEST_RAILS_API_KEY || "",
     projectId: process.env.TEST_RAILS_PROJECT_ID || "",
     suiteId: process.env.TEST_RAILS_SUITE_ID || "",
@@ -61,6 +62,5 @@ export const config: TestSyncAIConfig = {
         ? parseInt(process.env.TEST_RAILS_CUSTOM_TEST_LEVEL)
         : TestLevel.UnitTest,
     },
-    username: process.env.TEST_RAILS_USERNAME || "",
   },
 };
