@@ -1,8 +1,3 @@
-export interface Description {
-  id: string | null;
-  title: string;
-}
-
 export interface Suite {
   id: number;
   name: string;
@@ -53,3 +48,5 @@ export interface TestCase {
   custom_automation_tool_type?: AutomationToolType;
   custom_test_level?: TestLevel;
 }
+
+export type TestCaseDescription = Pick<TestCase, "id" | "title">;

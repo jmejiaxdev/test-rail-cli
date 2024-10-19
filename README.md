@@ -42,17 +42,16 @@
    npm install
    ```
 
-3. Set up environment variables for TestRails and OpenAI API keys. Create a `.env` file in the root directory with the following:
+3. Create a `.env` file in the root directory:
 
    ```bash
+   OPEN_AI_API_KEY=your_openai_api_key
    TESTRAIL_API_URL=https://yourcompany.testrail.io/index.php?/api/v2/
    TESTRAIL_USERNAME=yourusername
    TESTRAIL_API_KEY=yourapikey
    TESTRAIL_PROJECT_ID=your_project_id
    TESTRAIL_SUITE_ID=your_suite_id
    TESTRAIL_SECTION_ID=your_section_id
-
-   OPEN_AI_API_KEY=your_openai_api_key
    ```
 
 ## Usage
@@ -126,14 +125,14 @@ processTest("should get all flags", "./testFile.test.ts");
 
 ### Environment Variables
 
+- **OPEN_AI_API_KEY**: Your OpenAI API key to access the GPT model.
+- **OPEN_AI_MODEL**: Your OpenAI model to access the GPT model.
 - **TESTRAIL_API_URL**: The base URL for your TestRails API.
 - **TESTRAIL_USERNAME**: Your TestRails account username.
 - **TESTRAIL_API_KEY**: The API key for TestRails authentication.
 - **TESTRAIL_PROJECT_ID**: The ID of your TestRails project.
 - **TESTRAIL_SUITE_ID**: The ID of the suite where test cases should be added.
 - **TESTRAIL_SECTION_ID**: The section ID where test cases are organized.
-
-- **OPEN_AI_API_KEY**: Your OpenAI API key to access the GPT model.
 
 ### Scripts
 

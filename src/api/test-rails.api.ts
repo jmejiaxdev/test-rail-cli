@@ -1,11 +1,14 @@
 import axios from "axios";
-import { config } from "../definitions/config.definitions";
+import { Config } from "../definitions/config.definitions";
 import { Suite, TestCase } from "../definitions/test-case.definitions";
 
-const { testRails } = config;
-const { baseURL, username, password, projectId, testCase, suiteId } = testRails;
+const { baseURL, username, password, projectId, testCaseOptions, suiteId } = Config.testRails;
 
-const api = axios.create({ baseURL, auth: { username, password }, headers: { "Content-Type": "application/json" } });
+const api = axios.create({
+  baseURL,
+  auth: { username, password },
+  headers: { "Content-Type": "application/json" },
+});
 
 // FIXME: does it return something?
 const addTestCase = async (testCase: TestCase): Promise<TestCase> => {
@@ -23,7 +26,7 @@ const getSuites = async (): Promise<Suite[]> => {
   return response.data;
 };
 
-const getTestCases = async (sectionId: TestCase["section_id"] = testCase.section_id): Promise<TestCase[]> => {
+const getTestCases = async (sectionId: TestCase["section_id"] = testCaseOptions.section_id): Promise<TestCase[]> => {
   const response = await api.get(`get_cases/${projectId}&suite_id=${suiteId}&section_id=${sectionId}`);
   return response.data.cases;
 };
@@ -38,7 +41,7 @@ const updateTestCase = async (id: TestCase["id"], data: any): Promise<TestCase> 
   return response.data;
 };
 
-const testRailsAPI = {
+const TestRailsApi = {
   addTestCase,
   deleteTestCase,
   getSuites,
@@ -47,4 +50,4 @@ const testRailsAPI = {
   updateTestCase,
 };
 
-export default testRailsAPI;
+export default TestRailsApi;

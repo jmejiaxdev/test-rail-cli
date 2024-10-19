@@ -1,8 +1,9 @@
 import { isAxiosError } from "axios";
 import { ANSIColor } from "../definitions/color.definitions";
-import { rl } from "../definitions/read-line.definitions";
+import { Rl } from "../definitions/read-line.definitions";
+import { TestCaseDescription } from "../definitions/test-case.definitions";
 
-const logTestCaseStatus = (status: string, id: string, title: string): void => {
+const logTestCaseDescription = (status: string, testCase: TestCaseDescription): void => {
   const statusColor = {
     created: ANSIColor.Green,
     deleted: ANSIColor.Red,
@@ -10,7 +11,7 @@ const logTestCaseStatus = (status: string, id: string, title: string): void => {
     markAsDeleted: ANSIColor.Orange,
   }[status];
 
-  console.log(statusColor, `- (${status.toUpperCase()}) Test case: ${id}: ${title}`);
+  console.log(statusColor, `- (${status.toUpperCase()}) Test case description:  ${testCase}`);
 };
 
 const logError = (placeholder: string, error: any): void => {
@@ -33,13 +34,13 @@ const logError = (placeholder: string, error: any): void => {
 };
 
 const getInput = async (prompt: string): Promise<string> => {
-  return new Promise((resolve) => rl.question(prompt, (input) => resolve(input)));
+  return new Promise((resolve) => Rl.question(prompt, (input) => resolve(input)));
 };
 
-const consoleUtils = {
+const ConsoleUtils = {
   getInput,
   logError,
-  logTestCaseStatus,
+  logTestCaseStatus: logTestCaseDescription,
 };
 
-export default consoleUtils;
+export default ConsoleUtils;
