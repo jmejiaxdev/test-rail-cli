@@ -5,15 +5,14 @@ import ConsoleUtils from "./utils/console.utils";
 
 (async function main() {
   console.log("\n");
-  console.log("TEST SYNC AI");
-  console.log("\n");
+  console.log("TEST SYNC AI\n");
   console.log("1. Create test cases in TestRails");
   console.log("2. Update test cases in TestRails");
   console.log("3. Delete test cases in TestRails");
   console.log("4. Get suite tests in TestRails");
-  console.log("\n");
 
-  const operation = await ConsoleUtils.getInput("Enter the number corresponding to your choice: ");
+  const operation = await ConsoleUtils.getInput("\nEnter the number corresponding to your choice: ");
+  console.log("\n");
 
   switch (operation.trim()) {
     case "1":

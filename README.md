@@ -112,7 +112,7 @@ async function processTest(testDescription, filePath) {
     console.log(`TestRails ID for "${testDescription}": ${testId}`);
 
     addTestRailIdToTestDescription(filePath, testDescription, testId);
-    console.log(`Updated test description with TestRails ID in ${filePath}`);
+    console.log(`Updated test case description with TestRails ID in ${filePath}`);
   } catch (error) {
     console.error("Error processing test:", error);
   }

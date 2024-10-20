@@ -40,7 +40,7 @@ const getInput = async (prompt: string): Promise<string> => {
 const ConsoleUtils = {
   getInput,
   logError,
-  logTestCaseStatus: logTestCaseDescription,
+  logTestCaseDescription,
 };
 
 export default ConsoleUtils;

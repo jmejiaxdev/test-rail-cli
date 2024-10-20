@@ -8,28 +8,6 @@ import {
   TypeAutomation,
 } from "./test-case.definitions";
 
-// interface TestRailsConfig {
-//   baseURL: string;
-//   password: string;
-//   projectId: string;
-//   suiteId: string;
-//   testCase: TestCase;
-//   username: string;
-// }
-
-// interface OpenAIConfig {
-//   apiKey: string;
-//   model: string;
-//   projectId: string;
-// }
-
-// interface TestSyncAIConfig {
-//   openAI: OpenAIConfig;
-//   testExtension: string;
-//   testRails: TestRailsConfig;
-// }
-
-// export const configuration: TestSyncAIConfig = {
 export const Config = {
   openAI: {
     apiKey: process.env.OPEN_AI_API_KEY || "",

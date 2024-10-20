@@ -9,7 +9,9 @@ import FileUtils from "../utils/file.utils";
 const promptTestCaseOptions = async (): Promise<TestCase> => {
   const options: TestCase = { ...Config.testRails.testCaseOptions };
 
-  const setOptions = await ConsoleUtils.getInput("Use the TestRails test case options in your config file? (y/n): ");
+  const setOptions = await ConsoleUtils.getInput(
+    "\nWould you like to use the TestRail test case options from your config file? (y/n): "
+  );
   if (setOptions === "y") return options;
 
   const {
@@ -59,42 +61,37 @@ const promptTestCaseOptions = async (): Promise<TestCase> => {
   return options;
 };
 
-const getTestCases = async (codeFilePath: string, testCasesFilePath: string): Promise<string> => {
-  const codeFileContent = fs.readFileSync(codeFilePath, "utf8");
-  const currentTestCasesFileContent = fs.readFileSync(testCasesFilePath, "utf8");
+const createTestCasesWithChatGpt = async (codeFileContent: string, testCasesFileContent: string): Promise<string> => {
+  console.log("\nCreating test cases...");
 
-  console.log("\nCreating new test cases...");
-  const newTestCases = await TestCaseService.createTestCases(codeFileContent, currentTestCasesFileContent);
+  const testCases = await TestCaseService.createTestCases(codeFileContent, testCasesFileContent);
+  if (!testCases?.length) throw new Error("Unable to create test cases");
 
-  const testCasesContent = newTestCases
-    ? currentTestCasesFileContent.concat(newTestCases)
-    : currentTestCasesFileContent;
-  if (!testCasesContent) throw new Error("Unable to create test cases");
-
-  console.log("New test cases created");
-  return testCasesContent;
+  console.log("Test cases created");
+  return testCases;
 };
 
-const extractTestCaseDescriptions = async (testCases: string): Promise<TestCaseDescription[]> => {
+const extractTestCasesDescriptions = async (testCasesContent: string): Promise<TestCaseDescription[]> => {
   console.log("\nExtracting test cases descriptions...");
 
-  const testCaseDescriptions = await TestCaseService.extractTestCasesDescriptions(testCases);
+  const testCaseDescriptions = TestCaseService.extractTestCasesDescriptions(testCasesContent);
   if (!testCaseDescriptions.length) throw new Error("Unable to extract test cases descriptions");
 
   console.log("Unit tests descriptions extracted");
   return testCaseDescriptions;
 };
 
-const addTestCases = async (
+const addTestCasesToTestRails = async (
   testCaseDescriptions: TestCaseDescription[],
   options: TestCase
-): Promise<TestCaseDescription[]> => {
+): Promise<TestCase[]> => {
   console.log("\nAdding new test cases...");
 
   const newTestCasesDescriptions = testCaseDescriptions.filter((testCase) => !testCase.id);
   if (!newTestCasesDescriptions.length) console.log("No new test cases to add");
 
   const newTestCases = await TestCaseService.addTestCases(testCaseDescriptions, options);
+
   if (newTestCasesDescriptions.length !== newTestCases.length) {
     throw new Error(
       `Only ${newTestCases.length} out of ${newTestCasesDescriptions.length} test cases were added to TestRails. Would you like to revert by removing the newly added test cases to TesRails? (y/n): `
@@ -102,7 +99,26 @@ const addTestCases = async (
   }
 
   console.log("New test cases added");
-  return testCaseDescriptions;
+  return newTestCases;
+};
+
+const concatTestCasesContent = async (
+  testCasesFileContent: string,
+  newTestCasesContent: string,
+  newTestCases: TestCase[]
+): Promise<string> => {
+  // Update new test cases descriptions with their ids
+  newTestCases.forEach((testCase) => {
+    // FIXME: Not working, not getting the id
+    newTestCasesContent = newTestCasesContent.replace(testCase.title || "", `${testCase.id}: ${testCase.title}`);
+    ConsoleUtils.logTestCaseDescription("add", testCase);
+  });
+
+  const testCasesContent = newTestCasesContent
+    ? testCasesFileContent.concat(newTestCasesContent)
+    : testCasesFileContent;
+
+  return testCasesContent;
 };
 
 const handler = async (): Promise<void> => {
@@ -110,14 +126,17 @@ const handler = async (): Promise<void> => {
     const codeFilePath = await FileUtils.getCodeFilePath();
     const testCasesFilePath = await FileUtils.getTestCasesFilePath(codeFilePath);
     const testCaseOptions = await promptTestCaseOptions();
-    const testCasesContent = await getTestCases(codeFilePath, testCasesFilePath);
-    const currentTestCaseDescriptions = await extractTestCaseDescriptions(testCasesContent);
-    const newTestCaseDescriptions = await addTestCases(currentTestCaseDescriptions, testCaseOptions);
 
-    // Display new test cases
-    newTestCaseDescriptions.forEach((testCasedescription) =>
-      ConsoleUtils.logTestCaseStatus("add", testCasedescription)
-    );
+    const codeFileContent = fs.readFileSync(codeFilePath, "utf8");
+    const testCasesFileContent = fs.readFileSync(testCasesFilePath, "utf8");
+
+    const newTestCasesContent = await createTestCasesWithChatGpt(codeFileContent, testCasesFileContent);
+    const testCasesDescriptions = await extractTestCasesDescriptions(newTestCasesContent);
+    const newTestCases = await addTestCasesToTestRails(testCasesDescriptions, testCaseOptions);
+    const testCases = await concatTestCasesContent(testCasesFileContent, newTestCasesContent, newTestCases);
+
+    fs.writeFileSync(testCasesFilePath, testCases, "utf8");
+    console.log("Test cases file updated\n");
   } catch (err) {
     console.error("Error:", err);
   } finally {

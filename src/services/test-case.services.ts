@@ -46,22 +46,6 @@ const createTestCases = async (codeFileContent: string, testCasesFileContent: st
   return response && response.replace(/```javascript|```/g, "").trim();
 };
 
-const extractTestCasesDescriptions = (fileContent: string): TestCaseDescription[] => {
-  let match;
-  // Regular expression to match test descriptions with an optional id at the start
-  const testDescriptionRegex = /test\(['"`](\d+)?\s*:?\s*(.*)['"`],/g;
-  const testDescriptions: TestCaseDescription[] = [];
-
-  while ((match = testDescriptionRegex.exec(fileContent)) !== null) {
-    const id = match[1];
-    const title = match[2].trim();
-    testDescriptions.push({ id, title });
-  }
-
-  console.log(`Extracted test descriptions`, testDescriptions);
-  return testDescriptions;
-};
-
 const deleteTestCases = async (testCases: TestCase[]): Promise<TestCase[]> => {
   // use this from caller
   // const testRailsTestCases = await testRailsAPI.getTestCases(sectionId);
@@ -72,7 +56,7 @@ const deleteTestCases = async (testCases: TestCase[]): Promise<TestCase[]> => {
   await Promise.all(
     testCases.map(async (testCase) => {
       await TestRailsApi.updateTestCase(testCase.id, { custom_status_id: 6 });
-      ConsoleUtils.logTestCaseStatus("markAsDeleted", testCase);
+      ConsoleUtils.logTestCaseDescription("markAsDeleted", testCase);
     })
   );
 
@@ -86,12 +70,27 @@ const deleteTestCases = async (testCases: TestCase[]): Promise<TestCase[]> => {
     await Promise.all(
       testCases.map(async (testCase) => {
         await TestRailsApi.deleteTestCase(testCase.id);
-        ConsoleUtils.logTestCaseStatus("deleted", testCase);
+        ConsoleUtils.logTestCaseDescription("deleted", testCase);
       })
     );
   }
 
   return testCases;
+};
+
+const extractTestCasesDescriptions = (fileContent: string): TestCaseDescription[] => {
+  let match;
+  // Regular expression to match test descriptions with an optional id at the start
+  const testDescriptionRegex = /test\(['"`](\d+)?\s*:?\s*(.*)['"`],/g;
+  const testDescriptions: TestCaseDescription[] = [];
+
+  while ((match = testDescriptionRegex.exec(fileContent)) !== null) {
+    const id = match[1];
+    const title = match[2].trim();
+    testDescriptions.push({ id, title });
+  }
+
+  return testDescriptions;
 };
 
 const getTestCases = async (sectionId: string): Promise<TestCase[]> => {

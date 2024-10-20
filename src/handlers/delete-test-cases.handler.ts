@@ -19,7 +19,7 @@
 
 //     // Display new test cases
 //     newUnitTests.forEach(
-//       (testCase) => testCase.id && consoleUtils.logTestCaseStatus("add", testCase)
+//       (testCase) => testCase.id && consoleUtils.logTestCaseDescription("add", testCase)
 //     );
 //   } catch (err) {
 //     console.error("Error:", err);
