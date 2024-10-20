@@ -14,29 +14,29 @@ const createTestCasesFile = (filePath: string): string => {
   return testFilePath;
 };
 
-const getCodeFilePath = async (): Promise<string> => {
-  const filePath = await ConsoleUtils.getInput(`Enter the file path (e.g folder/file.ext): `);
+const getFileContent = (filePath: string): string => {
+  const fileContent = fs.readFileSync(filePath, "utf8");
+  if (!fileContent) console.log(`${filePath} is empty`);
+  return fileContent;
+};
+
+const getFilePath = async (message: string): Promise<string> => {
+  const filePath = await ConsoleUtils.getInput(message);
   if (!fs.existsSync(filePath)) throw new Error(`"${filePath}" is not a valid file path`);
   return filePath;
 };
 
-const getTestCasesFilePath = async (filePath: string): Promise<string> => {
-  const unitTestsFilePath = await ConsoleUtils.getInput(
-    "Enter the test cases file path or empty to create a new one: "
-  );
-  if (!unitTestsFilePath) return FileUtils.createTestCasesFile(filePath);
-
-  const isTestFileInvalid =
-    !fs.existsSync(unitTestsFilePath) || path.extname(unitTestsFilePath) !== Config.testExtension;
-  if (isTestFileInvalid) throw new Error(`Invalid test cases file path or extension "${unitTestsFilePath}"`);
-
-  return unitTestsFilePath;
+const hasFileExtension = (filePath: string, fileExtension: string) => {
+  const isTestFileInvalid = fs.existsSync(filePath) && path.extname(filePath) === fileExtension;
+  if (!isTestFileInvalid) throw new Error(`Invalid file extension "${filePath}"`);
+  return true;
 };
 
 const FileUtils = {
   createTestCasesFile,
-  getCodeFilePath,
-  getTestCasesFilePath,
+  getFileContent,
+  getFilePath,
+  hasFileExtension,
 };
 
 export default FileUtils;

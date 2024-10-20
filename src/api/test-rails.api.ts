@@ -2,7 +2,7 @@ import axios from "axios";
 import { Config } from "../definitions/config.definitions";
 import { Suite, TestCase } from "../definitions/test-case.definitions";
 
-const { baseURL, username, password, projectId, testCaseOptions, suiteId } = Config.testRails;
+const { baseURL, username, password, projectId, testCase: testCaseOptions, suiteId } = Config.testRails;
 
 const api = axios.create({
   baseURL,
@@ -26,9 +26,6 @@ const getSuites = async (): Promise<Suite[]> => {
 };
 
 const getTestCases = async (sectionId: TestCase["section_id"] = testCaseOptions.section_id): Promise<TestCase[]> => {
-  console.log("projectId", projectId);
-  console.log("suiteId", suiteId);
-  console.log("sectionId", sectionId);
   const response = await api.get(`get_cases/${projectId}&suite_id=${suiteId}&section_id=${sectionId}`);
   return response.data.cases;
 };

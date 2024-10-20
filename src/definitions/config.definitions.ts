@@ -21,7 +21,7 @@ export const Config = {
     password: process.env.TEST_RAILS_API_KEY || "",
     projectId: process.env.TEST_RAILS_PROJECT_ID || "",
     suiteId: process.env.TEST_RAILS_SUITE_ID || "",
-    testCaseOptions: {
+    testCase: {
       section_id: process.env.TEST_CASE_OPTION_SECTION_ID,
       template: process.env.TEST_CASE_OPTION_TEMPLATE
         ? parseInt(process.env.TEST_CASE_OPTION_TEMPLATE)
