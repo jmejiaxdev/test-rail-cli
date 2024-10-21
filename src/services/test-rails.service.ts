@@ -14,6 +14,8 @@ const deleteTestCases = async (testCaseDescritions: TestCaseDescription[]) => {
 };
 
 const extractTestCasesDescriptions = (fileContent: string): TestCaseDescription[] => {
+  console.log("Extracting test cases descriptions...");
+
   let match;
   // Regular expression to match test descriptions with an optional id at the start
   const testDescriptionRegex = /test\(['"`](\d+)?\s*:?\s*(.*)['"`],/g;
@@ -25,6 +27,7 @@ const extractTestCasesDescriptions = (fileContent: string): TestCaseDescription[
     testDescriptions.push({ id, title });
   }
 
+  console.log(`${testDescriptions} test cases descriptions`);
   return testDescriptions;
 };
 
@@ -46,16 +49,19 @@ const markTestCasesAsDeleted = async (testCaseDescritions: TestCaseDescription[]
 };
 
 const saveTestCases = async (testCasesDescriptions: TestCaseDescription[], options: TestCase): Promise<TestCase[]> => {
-  return await Promise.all(
+  console.log("Saving test cases...");
+
+  const testCasesSaved = await Promise.all(
     testCasesDescriptions.map(async (testCaseDescription) => {
       const testCase = { ...options, title: testCaseDescription.title };
-      if (testCaseDescription.id) {
-        return await TestRailsApi.updateTestCase(testCaseDescription.id, testCase);
-      } else {
-        return await TestRailsApi.addTestCase(testCase);
-      }
+      return testCaseDescription.id
+        ? await TestRailsApi.updateTestCase(testCaseDescription.id, testCase)
+        : await TestRailsApi.addTestCase(testCase);
     })
   );
+
+  console.log(`${testCasesSaved.length} test cases saved`);
+  return testCasesSaved;
 };
 
 const TestRailsService = {

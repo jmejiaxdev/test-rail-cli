@@ -61,13 +61,12 @@ const promptTestCaseOptions = async (): Promise<TestCase> => {
   return options;
 };
 
-const getTestCasesFileContent = (testCasesFilePath: string) =>
-  FileUtils.hasFileExtension(testCasesFilePath, Config.testExtension) &&
-  testCasesFilePath &&
-  FileUtils.getFileContent(testCasesFilePath);
+const getNewTestCasesContent = (testCases: TestCase[], testCasesFileContent: string) => {
+  const toNewContent = (content: string, newTestCase: TestCase) =>
+    content.replace(newTestCase?.title || "", `${newTestCase.id}: ${newTestCase.title}`);
 
-const toNewContent = (content: string, newTestCase: TestCase) =>
-  content.replace(newTestCase?.title || "", `${newTestCase.id}: ${newTestCase.title}`);
+  return testCases.reduce(toNewContent, testCasesFileContent);
+};
 
 export default async function handler(): Promise<void> {
   console.log(
@@ -77,12 +76,13 @@ export default async function handler(): Promise<void> {
   try {
     const testCaseOptions = await promptTestCaseOptions();
     const testCasesFilePath = await FileUtils.getFilePath("Enter the test cases file path: ");
-    const testCasesFileContent = getTestCasesFileContent(testCasesFilePath) || "";
+    const testCasesFileContent = FileUtils.getFileContent(testCasesFilePath) || "";
     const testCasesDescriptions = TestRailsService.extractTestCasesDescriptions(testCasesFileContent);
     const newTestCases = await TestRailsService.saveTestCases(testCasesDescriptions, testCaseOptions);
-    const newContent = newTestCases.reduce(toNewContent, testCasesFileContent);
+    const newTestContent = getNewTestCasesContent(newTestCases, testCasesFileContent);
 
-    fs.writeFileSync(testCasesFilePath, newContent, "utf8");
+    fs.writeFileSync(testCasesFilePath, newTestContent, "utf8");
+    console.log("Test cases saved to TestRails");
   } catch (err) {
     console.error("Error:", err);
   } finally {

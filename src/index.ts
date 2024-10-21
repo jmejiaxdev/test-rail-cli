@@ -8,10 +8,10 @@ import ConsoleUtils from "./utils/console.utils";
 
 (async function main() {
   console.log("\nTEST SYNC AI\n");
-  console.log("1. Create test cases in TestRails");
-  console.log("2. Update test cases in TestRails");
+  console.log("1. Get suite tests in TestRails");
+  console.log("2. Save test cases in TestRails");
   console.log("3. Delete test cases in TestRails");
-  console.log("4. Get suite tests in TestRails");
+  console.log("4. Create test cases with ChatGPT");
 
   const operation = await ConsoleUtils.getInput("\nEnter the number corresponding to your choice: ");
 
@@ -20,13 +20,13 @@ import ConsoleUtils from "./utils/console.utils";
       await getSuitesHandler();
       break;
     case "2":
-      await createTestCasesHandler();
-      break;
-    case "3":
       await saveTestCasesHandler();
       break;
-    case "4":
+    case "3":
       await deleteTestCasesHandler();
+      break;
+    case "4":
+      await createTestCasesHandler();
       break;
     default:
       main();
