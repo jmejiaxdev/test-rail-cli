@@ -1,21 +1,23 @@
 import { isAxiosError } from "axios";
-import { ANSIColor } from "../definitions/color.definitions";
-import { Rl } from "../definitions/read-line.definitions";
 import { TestCaseDescription } from "../definitions/test-case.definitions";
+import { ANSIColor, Rl, Status } from "../definitions/console.definitions";
 
-const logTestCaseDescription = (status: string, testCase: TestCaseDescription): void => {
+const logTestCaseDescription = (status: Status, testCaseDescription: TestCaseDescription): void => {
+  const { id, title } = testCaseDescription;
+
   const statusColor = {
-    created: ANSIColor.Green,
-    deleted: ANSIColor.Red,
-    unchanged: ANSIColor.Yellow,
+    added: ANSIColor.Green,
+    updated: ANSIColor.Yellow,
     markAsDeleted: ANSIColor.Orange,
+    deleted: ANSIColor.Red,
   }[status];
 
-  console.log(statusColor, `- (${status.toUpperCase()}) Test case description:  ${testCase}`);
+  console.log(statusColor, `${status.toUpperCase()} || ${id} || ${title}`);
 };
 
-const logError = (placeholder: string, error: any): void => {
+const logError = (error: any, placeholder: string = ""): void => {
   let formattedError = error;
+
   if (isAxiosError(error)) {
     formattedError = {
       config: {

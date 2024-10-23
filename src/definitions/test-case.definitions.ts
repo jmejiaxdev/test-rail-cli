@@ -1,6 +1,7 @@
 export interface Suite {
-  id: number;
-  name: string;
+  id?: number;
+  name?: string;
+  url?: string;
 }
 
 export enum Template {
@@ -8,11 +9,15 @@ export enum Template {
 }
 
 export enum Type {
-  UnitTest = 16,
+  UnitTest = 1,
 }
 
 export enum Priority {
   MustTest = 1,
+}
+
+export enum CustomStatusId {
+  MarkAsDeleted = 3,
 }
 
 export enum ManualVSAutomated {
@@ -43,6 +48,7 @@ export interface TestCase {
   type_id?: Type;
   priority_id?: Priority;
   refs?: string;
+  custom_status_id?: CustomStatusId;
   custom_manual_vs_automated?: ManualVSAutomated;
   custom_manual_automated?: TypeAutomation;
   custom_automation_tool_type?: AutomationToolType;
@@ -50,3 +56,8 @@ export interface TestCase {
 }
 
 export type TestCaseDescription = Pick<TestCase, "id" | "title">;
+
+export interface SaveTestCases {
+  added: TestCase[];
+  updated: TestCase[];
+}

@@ -1,9 +1,10 @@
 import fs from "fs";
 import { Config } from "../definitions/config.definitions";
-import { Rl } from "../definitions/read-line.definitions";
 import ChatGPTService from "../services/chat-gpt.service";
 import FileUtils from "../utils/file.utils";
+import ConsoleUtils from "../utils/console.utils";
 
+// Test me
 const getTestsFileContent = (testCasesFilePath: string) =>
   FileUtils.hasFileExtension(testCasesFilePath, Config.testExtension) && testCasesFilePath
     ? FileUtils.getFileContent(testCasesFilePath)
@@ -25,8 +26,6 @@ export default async function handler() {
     fs.writeFileSync(testCasesFilePath, testCasesContent, "utf8");
     console.log(`Test cases file ${testCasesFilePath} updated with ${newTestCasesContent?.length} new test cases`);
   } catch (err) {
-    console.error("Error:", err);
-  } finally {
-    Rl.close();
+    ConsoleUtils.logError(err);
   }
 }

@@ -1,14 +1,16 @@
 import TestRailsApi from "../api/test-rails.api";
-import { TestCase, TestCaseDescription } from "../definitions/test-case.definitions";
+import { SaveTestCases, TestCase, TestCaseDescription } from "../definitions/test-case.definitions";
 import ConsoleUtils from "../utils/console.utils";
 
 const deleteTestCases = async (testCaseDescritions: TestCaseDescription[]) => {
-  await Promise.all(
-    testCaseDescritions.map(async (testCase) => {
-      await TestRailsApi.deleteTestCase(testCase.id);
-      ConsoleUtils.logTestCaseDescription("deleted", testCase);
-    })
-  );
+  console.log("Deleting test cases in TestRails...");
+
+  for (const testCase of testCaseDescritions) {
+    await TestRailsApi.deleteTestCase(testCase.id);
+    ConsoleUtils.logTestCaseDescription("deleted", testCase);
+  }
+
+  if (testCaseDescritions.length) console.log(`${testCaseDescritions.length} test cases deleted in TestRails`);
 
   return testCaseDescritions.length;
 };
@@ -18,50 +20,81 @@ const extractTestCasesDescriptions = (fileContent: string): TestCaseDescription[
 
   let match;
   // Regular expression to match test descriptions with an optional id at the start
-  const testDescriptionRegex = /test\(['"`](\d+)?\s*:?\s*(.*)['"`],/g;
-  const testDescriptions: TestCaseDescription[] = [];
+  const descriptionRegex = /test\(['"`](\d+)?\s*:?\s*(.*)['"`],/g;
+  const testCaseDescriptions: TestCaseDescription[] = [];
 
-  while ((match = testDescriptionRegex.exec(fileContent)) !== null) {
+  while ((match = descriptionRegex.exec(fileContent)) !== null) {
     const id = match[1];
     const title = match[2].trim();
-    testDescriptions.push({ id, title });
+    testCaseDescriptions.push({ id, title });
   }
 
-  console.log(`${testDescriptions} test cases descriptions`);
-  return testDescriptions;
+  if (testCaseDescriptions.length) console.log(`${testCaseDescriptions.length} test cases descriptions extracted`);
+
+  return testCaseDescriptions;
 };
 
-const getSuites = async () => TestRailsApi.getSuites();
+const getSuites = async () => {
+  console.log("Getting test suites from TestRails...");
 
-const getTestCases = async (sectionId: string): Promise<TestCase[]> => {
-  return await TestRailsApi.getTestCases(sectionId);
+  const suites = await TestRailsApi.getSuites();
+
+  suites.forEach((suite) => console.log(`${suite.id} || ${suite.name} || ${suite.url}`));
+  if (suites.length) console.log(`${suites.length} in TestRails`);
+
+  return suites;
 };
 
-const markTestCasesAsDeleted = async (testCaseDescritions: TestCaseDescription[]) => {
-  await Promise.all(
-    testCaseDescritions.map(async (testCaseDescriptions) => {
-      await TestRailsApi.updateTestCase(testCaseDescriptions.id, { custom_status_id: 6 });
-      ConsoleUtils.logTestCaseDescription("markAsDeleted", testCaseDescriptions);
-    })
-  );
+const getTestCases = async (): Promise<TestCase[]> => {
+  console.log("Getting test cases from TestRails...");
 
-  return testCaseDescritions.length;
+  const testCases = await TestRailsApi.getTestCases();
+
+  testCases.forEach((testCase) => console.log(`${testCase.id} || ${testCase.title}`));
+  if (testCases.length) console.log(`${testCases.length} test cases in TestRails`);
+
+  return testCases;
 };
 
-const saveTestCases = async (testCasesDescriptions: TestCaseDescription[], options: TestCase): Promise<TestCase[]> => {
-  console.log("Saving test cases...");
+// const markTestCasesAsDeleted = async (testCaseDescritions: TestCaseDescription[]) => {
+//   for (const testCaseDescriptions of testCaseDescritions) {
+//     await TestRailsApi.updateTestCase(testCaseDescriptions.id, { custom_status_id: CustomStatusId.MarkAsDeleted });
+//     ConsoleUtils.logTestCaseDescription("markAsDeleted", testCaseDescriptions);
+//   }
 
-  const testCasesSaved = await Promise.all(
-    testCasesDescriptions.map(async (testCaseDescription) => {
-      const testCase = { ...options, title: testCaseDescription.title };
-      return testCaseDescription.id
-        ? await TestRailsApi.updateTestCase(testCaseDescription.id, testCase)
-        : await TestRailsApi.addTestCase(testCase);
-    })
-  );
+//   return testCaseDescritions.length;
+// };
 
-  console.log(`${testCasesSaved.length} test cases saved`);
-  return testCasesSaved;
+const saveTestCases = async (
+  testCasesDescriptions: TestCaseDescription[],
+  testCaseOptions: TestCase
+): Promise<SaveTestCases> => {
+  console.log("Saving test cases in TestRails...");
+
+  const savedTestCases: SaveTestCases = { added: [], updated: [] };
+
+  for (const testCaseDescription of testCasesDescriptions) {
+    const testCase = { ...testCaseOptions, title: testCaseDescription.title };
+
+    if (testCaseDescription.id) {
+      const updatedTestCase = await TestRailsApi.updateTestCase(testCaseDescription.id, testCase);
+      if (!updatedTestCase) continue;
+
+      ConsoleUtils.logTestCaseDescription("updated", updatedTestCase);
+      savedTestCases.updated.push(updatedTestCase);
+    } else {
+      const addedTestCase = await TestRailsApi.addTestCase(testCase);
+      if (!addedTestCase) continue;
+
+      ConsoleUtils.logTestCaseDescription("added", addedTestCase);
+      savedTestCases.added.push(addedTestCase);
+    }
+  }
+
+  console.log(`${savedTestCases.added.length} test cases added in TestRails`);
+  console.log(`${savedTestCases.updated.length} test cases updated in TestRails`);
+
+  return savedTestCases;
 };
 
 const TestRailsService = {
@@ -69,7 +102,7 @@ const TestRailsService = {
   extractTestCasesDescriptions,
   getSuites,
   getTestCases,
-  markTestCasesAsDeleted,
+  // markTestCasesAsDeleted,
   saveTestCases,
 };
 

@@ -27,6 +27,10 @@ const getFilePath = async (message: string): Promise<string> => {
 };
 
 const hasFileExtension = (filePath: string, fileExtension: string) => {
+  console.log("filePath", filePath);
+  console.log("fileExtension", fileExtension);
+  console.log("fs.existsSync(filePath)", fs.existsSync(filePath));
+  console.log("path.extname(filePath)", path.extname(filePath));
   const isTestFileInvalid = fs.existsSync(filePath) && path.extname(filePath) === fileExtension;
   if (!isTestFileInvalid) throw new Error(`Invalid file extension "${filePath}"`);
   return true;
