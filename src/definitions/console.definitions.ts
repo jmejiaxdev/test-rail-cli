@@ -1,6 +1,6 @@
 import readline from "readline";
 
-export const Rl = readline.createInterface({
+export const RL = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
@@ -13,4 +13,4 @@ export enum ANSIColor {
   Yellow = "\x1b[33m%s\x1b[0m",
 }
 
-export type Status = "added" | "deleted" | "markAsDeleted" | "updated";
+// export type Status = "added" | "deleted" | "markAsDeleted" | "updated";

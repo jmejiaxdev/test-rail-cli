@@ -1,4 +1,4 @@
-import sum from "./sum";
+import sum from "../sum";
 
 describe("sum function", () => {
   test("16540003: TEST [Given] two positive numbers [When] they are added [Then] the result should be their sum", () => {

@@ -1,48 +1,46 @@
 import { isAxiosError } from "axios";
-import { TestCaseDescription } from "../definitions/test-case.definitions";
-import { ANSIColor, Rl, Status } from "../definitions/console.definitions";
+import { ANSIColor, RL } from "../definitions/console.definitions";
+import { ENV } from "../config/env.config";
+import { TestCase } from "../definitions/test-case.definitions";
 
-const logTestCaseDescription = (status: Status, testCaseDescription: TestCaseDescription): void => {
-  const { id, title } = testCaseDescription;
-
-  const statusColor = {
-    added: ANSIColor.Green,
-    updated: ANSIColor.Yellow,
-    markAsDeleted: ANSIColor.Orange,
-    deleted: ANSIColor.Red,
-  }[status];
-
-  console.log(statusColor, `${status.toUpperCase()} || ${id} || ${title}`);
+export const getInput = async (prompt: string): Promise<string> => {
+  return new Promise((resolve) => RL.question(prompt, (input) => resolve(input)));
 };
 
-const logError = (error: any, placeholder: string = ""): void => {
-  let formattedError = error;
+export const promptTestCaseOptions = async (): Promise<TestCase> => {
+  console.log("Using your .env file defaults...");
 
-  if (isAxiosError(error)) {
-    formattedError = {
-      config: {
-        headers: error.config?.headers,
-        baseURL: error.config?.baseURL,
-        method: error.config?.method,
-        url: error.config?.url,
-        data: error.config?.data,
-      },
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-    };
-  }
+  const { testCase } = ENV;
 
-  console.error(ANSIColor.Red, placeholder, formattedError);
+  const {
+    section_id,
+    template,
+    type_id,
+    priority_id,
+    refs,
+    custom_manual_vs_automated,
+    custom_automation_tool_type,
+    custom_test_level,
+  } = testCase;
+
+  testCase.section_id = (await getInput(`Enter Section ID: ${section_id})`)) || section_id;
+
+  testCase.template = parseInt(await getInput(`Enter Template: ${template}`)) || template;
+
+  testCase.type_id = parseInt(await getInput(`Enter Type ID: ${type_id}`)) || type_id;
+
+  testCase.priority_id = parseInt(await getInput(`Enter Priority: ${priority_id}`)) || priority_id;
+
+  testCase.refs = (await getInput(`Enter References: ${refs}`)) || refs;
+
+  testCase.custom_manual_vs_automated =
+    parseInt(await getInput(`Enter Manual vs Automated: ${custom_manual_vs_automated}`)) || custom_manual_vs_automated;
+
+  testCase.custom_automation_tool_type =
+    parseInt(await getInput(`Enter Automation Tool Type: ${custom_automation_tool_type}`)) ||
+    custom_automation_tool_type;
+
+  testCase.custom_test_level = parseInt(await getInput(`Enter Test Level: ${custom_test_level}`)) || custom_test_level;
+
+  return testCase;
 };
-
-const getInput = async (prompt: string): Promise<string> => {
-  return new Promise((resolve) => Rl.question(prompt, (input) => resolve(input)));
-};
-
-const ConsoleUtils = {
-  getInput,
-  logError,
-  logTestCaseDescription,
-};
-
-export default ConsoleUtils;

@@ -1,46 +1,35 @@
 import fs from "fs";
-import path from "path";
-import { Config } from "../definitions/config.definitions";
-import ConsoleUtils from "./console.utils";
 
-const createTestCasesFile = (filePath: string): string => {
-  const directory = path.dirname(filePath);
-  const name = path.basename(filePath, path.extname(filePath));
-  const extension = path.extname(filePath);
+import { getInput } from "./console.utils";
 
-  const testFilePath = `${directory}/${name}${Config.testExtension}${extension}`;
-  fs.writeFileSync(testFilePath, "");
-
-  return testFilePath;
-};
-
-const getFileContent = (filePath: string): string => {
+export const getFileContent = (filePath: string): string => {
   const fileContent = fs.readFileSync(filePath, "utf8");
-  if (!fileContent) console.log(`${filePath} is empty`);
+
+  if (!fileContent) {
+    throw new Error(`"${filePath}" is empty`);
+  }
+
   return fileContent;
 };
 
-const getFilePath = async (message: string): Promise<string> => {
-  const filePath = await ConsoleUtils.getInput(message);
-  if (!fs.existsSync(filePath)) throw new Error(`"${filePath}" is not a valid file path`);
+export const getFilePath = async (message: string): Promise<string> => {
+  const filePath = await getInput(message);
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`"${filePath}" is not a valid file path`);
+  }
+
   return filePath;
 };
 
-const hasFileExtension = (filePath: string, fileExtension: string) => {
-  console.log("filePath", filePath);
-  console.log("fileExtension", fileExtension);
-  console.log("fs.existsSync(filePath)", fs.existsSync(filePath));
-  console.log("path.extname(filePath)", path.extname(filePath));
-  const isTestFileInvalid = fs.existsSync(filePath) && path.extname(filePath) === fileExtension;
-  if (!isTestFileInvalid) throw new Error(`Invalid file extension "${filePath}"`);
-  return true;
-};
+export function getFileTitles(fileContent: string): RegExpMatchArray[] {
+  const regex = /(it|test)\(\s*['"`](.*)['"`]/g;
+  const matches: RegExpMatchArray[] = [];
+  let match;
 
-const FileUtils = {
-  createTestCasesFile,
-  getFileContent,
-  getFilePath,
-  hasFileExtension,
-};
+  while ((match = regex.exec(fileContent)) !== null) {
+    matches.push(match);
+  }
 
-export default FileUtils;
+  return matches;
+}

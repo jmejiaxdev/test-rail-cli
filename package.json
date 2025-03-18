@@ -1,7 +1,7 @@
 {
-  "name": "test-sync-ai",
+  "name": "testrail-cli",
   "version": "1.0.0",
-  "description": "Integrating test descriptions with TestRails and automating Gherkin conversion",
+  "description": "Integrating unit tests with TestRail",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,25 +11,33 @@
     "test:watch": "jest --watch"
   },
   "keywords": [
-    "ai",
-    "gherking",
     "test",
     "testrail"
   ],
-  "author": "jmejiax",
+  "author": "jmejiaxdev",
   "license": "ISC",
   "devDependencies": {
-    "@types/jest": "^29.5.13",
+    "@eslint/js": "^9.21.0",
+    "@types/jest": "^29.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
     "cross-env": "^7.0.3",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
+    "eslint-import-resolver-typescript": "^3.8.3",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.11.0",
+    "eslint-plugin-no-unsanitized": "^4.1.2",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "jest": "^29.7.0",
-    "jest-watch-typeahead": "^2.2.2",
-    "ts-jest": "^29.2.5",
-    "tsx": "^4.19.1",
-    "typescript": "^5.6.3"
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.2.6",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "axios": "^1.7.7",
-    "dotenv": "^16.4.5",
-    "openai": "^4.67.3"
+    "dotenv": "^16.4.5"
   }
 }

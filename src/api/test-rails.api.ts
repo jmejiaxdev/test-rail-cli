@@ -1,52 +1,44 @@
 import axios from "axios";
-import { Config } from "../definitions/config.definitions";
-import { Suite, TestCase } from "../definitions/test-case.definitions";
+import { ENV } from "../config/env.config";
+import { Suite } from "../definitions/suite.definitions";
+import { TestCase } from "../definitions/test-case.definitions";
 
-const { organizationUrl, username, password, projectId, testCase, suiteId } = Config.testRails;
+const { organizationUrl, username, password, projectId, suiteId } = ENV.api;
+const { section_id } = ENV.testCase;
 
-const api = axios.create({
+const axiosInstance = axios.create({
   baseURL: `${organizationUrl}/api/v2/`,
   auth: { username, password },
   headers: { "Content-Type": "application/json" },
 });
 
-const addTestCase = async (testCase: TestCase): Promise<TestCase> => {
-  const response = await api.post(`add_case/${testCase.section_id}`, testCase);
+export const addTestCase = async (testCase: TestCase): Promise<TestCase> => {
+  const response = await axiosInstance.post(`add_case/${testCase.section_id}`, testCase);
   return response.data;
 };
 
-const deleteTestCase = async (id: TestCase["id"]): Promise<TestCase> => {
-  const response = await api.post(`delete_case/${id}`);
+export const deleteTestCase = async (id: TestCase["id"]): Promise<TestCase> => {
+  const response = await axiosInstance.post(`delete_case/${id}`);
   return response.data;
 };
 
-const getSuites = async (): Promise<Suite[]> => {
-  const response = await api.get(`get_suites/${projectId}`);
+export const fetchSuites = async (): Promise<Suite[]> => {
+  const response = await axiosInstance.get(`get_suites/${projectId}`);
   return response.data;
 };
 
-const getTestCases = async (): Promise<TestCase[]> => {
-  const response = await api.get(`get_cases/${projectId}&suite_id=${suiteId}&section_id=${testCase.section_id}`);
+export const fetchTestCases = async (): Promise<TestCase[]> => {
+  const response = await axiosInstance.get(`get_cases/${projectId}&suite_id=${suiteId}&section_id=${section_id}`);
   return response.data.cases;
 };
 
-const getTestCase = async (id: TestCase["id"]): Promise<TestCase> => {
-  const response = await api.get(`get_test/${id}`);
+export const fetchTestCase = async (id: TestCase["id"]): Promise<TestCase> => {
+  const response = await axiosInstance.get(`get_test/${id}`);
   return response.data;
 };
 
-const updateTestCase = async (id: TestCase["id"], data: any): Promise<TestCase> => {
-  const response = await api.post(`update_case/${id}`, data);
+export const updateTestCase = async (testCase: TestCase): Promise<TestCase> => {
+  const { id, ...data } = testCase;
+  const response = await axiosInstance.post(`update_case/${id}`, data);
   return response.data;
 };
-
-const TestRailsApi = {
-  addTestCase,
-  deleteTestCase,
-  getSuites,
-  getTestCases,
-  getTestCase,
-  updateTestCase,
-};
-
-export default TestRailsApi;
